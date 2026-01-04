@@ -1,0 +1,14 @@
+<h2>Dashboard</h2>
+
+<a href="{{ url_for('logs.search_logs') }}">Search Logs</a><br>
+<a href="{{ url_for('alerts.my_alerts') }}">My Alerts</a><br>
+<a href="{{ url_for('alerts.create_alert') }}">Create Alert</a><br>
+
+{% if current_user.role == "admin" %}
+    <hr>
+    <strong>Admin Options</strong><br>
+    <a href="{{ url_for('logs.upload_logs') }}">Upload Logs</a><br>
+{% endif %}
+
+<br>
+<a href="{{ url_for('auth.logout') }}">Logout</a>
