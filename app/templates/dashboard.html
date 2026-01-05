@@ -1,14 +1,44 @@
-<h2>Dashboard</h2>
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
 
-<a href="{{ url_for('logs.search_logs') }}">Search Logs</a><br>
-<a href="{{ url_for('alerts.my_alerts') }}">My Alerts</a><br>
-<a href="{{ url_for('alerts.create_alert') }}">Create Alert</a><br>
+{% block content %}
 
-{% if current_user.role == "admin" %}
-    <hr>
-    <strong>Admin Options</strong><br>
-    <a href="{{ url_for('logs.upload_logs') }}">Upload Logs</a><br>
-{% endif %}
+<div class="row mb-4">
+    <div class="col">
+        <h3 class="fw-bold">Dashboard</h3>
+        <p class="text-muted">System overview & monitoring status</p>
+    </div>
+</div>
 
-<br>
-<a href="{{ url_for('auth.logout') }}">Logout</a>
+<div class="row g-4">
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="fw-bold">{{ log_count }}</h2>
+                <p class="text-muted mb-0">Total Logs</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="fw-bold">{{ alert_count }}</h2>
+                <p class="text-muted mb-0">Active Alerts</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="fw-bold">{{ source_count }}</h2>
+                <p class="text-muted mb-0">Log Sources</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Upload Logs</title>
-</head>
-<body>
-
-<h2>Upload Log File</h2>
+<h2>Upload Logs</h2>
 
 <form method="POST" enctype="multipart/form-data">
     <input type="file" name="logfile" required>
@@ -13,8 +6,21 @@
 </form>
 
 <br>
-<a href="{{ url_for('logs.search_logs') }}">Search Logs</a><br>
-<a href="{{ url_for('auth.dashboard') }}">Back to Dashboard</a>
 
-</body>
-</html>
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <p style="color: {{ 'green' if category == 'success' else 'red' }}">
+        {{ message }}
+      </p>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<hr>
+
+<p><strong>Total logs currently in memory:</strong> {{ total_logs }}</p>
+
+<br>
+<a href="{{ url_for('auth.dashboard') }}">Back to Dashboard</a>

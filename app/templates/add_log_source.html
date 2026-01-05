@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Add Log Source{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+
+    <h3 class="fw-bold mb-3">Add Log Source</h3>
+    <p class="text-muted mb-4">
+      Configure a file path to ingest logs
+    </p>
+
+    <form method="POST">
+
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+          <div class="mb-3">
+            <label class="form-label">Source Name</label>
+            <input type="text" name="name"
+                   class="form-control"
+                   placeholder="Application Logs" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Log File Path</label>
+            <input type="text" name="file_path"
+                   class="form-control"
+                   placeholder="C:\logs\application.log" required>
+          </div>
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox"
+                   name="enabled" checked>
+            <label class="form-check-label">Enabled</label>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="text-end">
+        <button class="btn btn-success">Add Source</button>
+        <a href="{{ url_for('logs.list_log_sources') }}"
+           class="btn btn-outline-secondary ms-2">
+           Cancel
+        </a>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
