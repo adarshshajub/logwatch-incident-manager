@@ -5,7 +5,7 @@ from flask import current_app
 
 def send_email(to, subject, body, html_content=None, importance="normal"):
     msg = EmailMessage()
-    msg["From"] = current_app.MAIL_USERNAME
+    msg["From"] = current_app.config["MAIL_DEFAULT_SENDER"]
     msg["To"] = ", ".join(to)
     msg["Subject"] = subject
 
@@ -32,8 +32,9 @@ def send_email(to, subject, body, html_content=None, importance="normal"):
     if html_content:
         msg.add_alternative(html_content, subtype="html")
 
-    with smtplib.SMTP(current_app.MAIL_SERVER, current_app.MAIL_PORT) as server:
-        server.starttls()
-        server.login(current_app.MAIL_USERNAME, current_app.MAIL_PASSWORD)
+    with smtplib.SMTP(current_app.config["MAIL_SERVER"], current_app.config["MAIL_PORT"]) as server:
+        if current_app.config["MAIL_USE_TLS"]:
+            server.starttls()
+        server.login(current_app.config["MAIL_USERNAME"], current_app.config["MAIL_PASSWORD"])
         server.send_message(msg)
 

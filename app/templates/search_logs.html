@@ -26,16 +26,15 @@
                 <th>Time</th>
                 <!-- <th>Level</th> -->
                 <th>Message</th>
+                <th>Source</th>
             </tr>
             </thead>
             <tbody>
             {% for log in results %}
             <tr>
                 <td>{{ log.timestamp }}</td>
-                <!-- <td>
-                    <span class="badge bg-danger">{{ log.level }}</span>
-                </td> -->
                 <td>{{ log.message }}</td>
+                <td>{{ log.source.file_path }}</td>
             </tr>
             {% endfor %}
             </tbody>

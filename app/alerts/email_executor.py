@@ -2,9 +2,7 @@ from app.utils.email_service import send_email
 from app.utils.template_renderer import render_template_string
 from app.models.alert_execution import AlertExecution
 from app.extensions import db
-from email.message import EmailMessage
-import smtplib
-from app.config import Config
+from datetime import datetime
 
 
 def execute_email_action(alert, action_config, log_data):
@@ -32,7 +30,8 @@ def execute_email_action(alert, action_config, log_data):
             alert_id=alert.id,
             action_type="email",
             status="SUCCESS",
-            message="Email sent successfully"
+            message="Email sent successfully",
+            triggered_at=datetime.utcnow()
         ))
 
     except Exception as e:

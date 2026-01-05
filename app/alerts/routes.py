@@ -66,7 +66,7 @@ def create_alert():
     if request.method == "POST":
         keyword = request.form["keyword"].strip()
 
-        # 🔥 Get multiple actions
+        # Get multiple actions
         email_selected = "email_action" in request.form
         email_log_include = "email_include_log" in request.form
         sn_selected = "sn_action" in request.form
@@ -84,13 +84,14 @@ def create_alert():
         db.session.add(alert)
         db.session.flush()  # get alert.id
 
-        search_request = None
+        email_search_request = None
+        sn_search_request = "" 
         if keyword:
             results = LogEntry.query.filter(
                 LogEntry.message.ilike(f"%{keyword}%")
             ).order_by(LogEntry.created_at.desc()).all()
 
-            search_request = f"""
+            email_search_request = f"""
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -102,15 +103,24 @@ def create_alert():
                     """
             
             for result in results:
-                search_request += f"""
+                email_search_request += f"""
                         <tr>
                             <td>{ result.timestamp }</td>
                             <td>{ result.message }</td>
                         </tr>
                     """
+                
+                sn_search_request += f"""
+                        ------------------------------------------
+                        {result.timestamp}\n
+                        { result.message }\n
+                        ------------------------------------------\n
+                    """ 
             
-            search_request += """ </tbody>
+            email_search_request += """ </tbody>
                     </table>"""
+
+
 
         # Email action
         if "email_action" in request.form:
@@ -123,7 +133,7 @@ def create_alert():
             }
 
             if email_log_include:
-                email_config["search_content"] = search_request
+                email_config["search_content"] = email_search_request
 
             db.session.add(AlertAction(
                 alert_id=alert.id,
@@ -141,7 +151,7 @@ def create_alert():
             }
 
             if sn_log_include:
-                sn_config["search_content"] = search_request
+                sn_config["search_content"] = sn_search_request
 
             db.session.add(AlertAction(
                 alert_id=alert.id,
@@ -156,13 +166,4 @@ def create_alert():
     return render_template("create_alert.html")
 
 
-@alert_bp.route("/my-alerts")
-@login_required
-def my_alerts():
-    if current_user.role == "admin":
-        alerts = AlertConfig.query.all()
-    else:
-        alerts = AlertConfig.query.filter_by(user_id=current_user.id).all()
-
-    return render_template("my_alerts.html", alerts=alerts)
 

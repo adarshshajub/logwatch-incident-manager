@@ -11,11 +11,11 @@ class Config:
 
     # Email
     MAIL_SERVER = os.getenv('MAIL_SERVER')
-    MAIL_PORT = os.getenv('MAIL_PORT')
+    MAIL_PORT = int(os.getenv('MAIL_PORT'))
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = f"Log Monitor <{MAIL_USERNAME}>"
+    MAIL_DEFAULT_SENDER = f"Log Monitor <{os.getenv('MAIL_USERNAME')}>"
 
     # Service-now
     SERVICENOW_INSTANCE = f"https://{os.getenv('SERVICENOW_INSTANCE')}.service-now.com"
