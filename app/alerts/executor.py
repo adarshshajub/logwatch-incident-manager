@@ -17,9 +17,9 @@ def process_log_for_alerts(alert, log_data):
         # 📧 Email
         if action.action_type == "email":
             execute_email_action(alert, action.config, log_data)
-            record_execution(alert.id, "email")
+            # record_execution(alert.id, "email")
 
         # 🎫 ServiceNow
         if action.action_type == "servicenow":
             execute_servicenow_action(alert, action.config, log_data)
-            record_execution(alert.id, "servicenow")
+            # record_execution(alert.id, "servicenow")

@@ -3,9 +3,10 @@ from datetime import datetime
 
 def parse_text_log(file_content):
     logs = []
+    current_time = datetime.now()
     for line in file_content.splitlines():
         logs.append({
-            "timestamp": None,
+            "timestamp": current_time.strftime('%Y-%m-%d %H:%M:%S') ,
             "level": "UNKNOWN",
             "message": line
         })

@@ -1,48 +1,96 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required
 from app.utils.decorators import admin_required
 from .parser import parse_log_file
-from app.logs.analyzer import analyze_log 
+from app.models.log_source import LogSource
+from app.extensions import db
+from app.models.log_entry import LogEntry
+
 
 log_bp = Blueprint("logs", __name__, url_prefix="/logs")
 
-LOG_STORAGE = []
-
-# ✅ Admin only
-@log_bp.route("/upload", methods=["GET", "POST"])
+# Admin only
+@log_bp.route("/add-source", methods=["GET", "POST"])
 @login_required
 @admin_required
-def upload_logs():
-    global LOG_STORAGE
+def add_log_source():
+    if request.method == "POST":
+        name = request.form["name"]
+        file_path = request.form["file_path"]
+
+        source = LogSource(
+            name=name,
+            file_path=file_path
+        )
+        db.session.add(source)
+        db.session.commit()
+
+        flash("Log source added successfully", "success")
+        return redirect(url_for("logs.add_log_source"))
+
+    return render_template("add_log_source.html")
+
+
+@log_bp.route("/sources")
+@login_required
+@admin_required
+def list_log_sources():
+    sources = LogSource.query.order_by(LogSource.id.desc()).all()
+    return render_template("log_sources.html", sources=sources)
+
+
+@log_bp.route("/sources/toggle/<int:source_id>")
+@login_required
+@admin_required
+def toggle_log_source(source_id):
+    source = LogSource.query.get_or_404(source_id)
+    source.enabled = not source.enabled
+    db.session.commit()
+    return redirect(url_for("logs.list_log_sources"))
+
+@log_bp.route("/sources/edit/<int:source_id>", methods=["GET", "POST"])
+@login_required
+@admin_required
+def edit_log_source(source_id):
+    source = LogSource.query.get_or_404(source_id)
 
     if request.method == "POST":
-        file = request.files.get("logfile")
+        new_name = request.form["name"]
+        new_path = request.form["file_path"]
+        enabled = "enabled" in request.form
+        reset_offset = "reset_offset" in request.form
 
-        if file:
-            content = file.read().decode("utf-8")
+        # Detect path change
+        path_changed = new_path != source.file_path
 
-            # 🔹 Parse logs
-            parsed_logs = parse_log_file(file.filename, content)
+        source.name = new_name
+        source.file_path = new_path
+        source.enabled = enabled
 
-            # 🔹 Store + analyze each log
-            for log in parsed_logs:
-                LOG_STORAGE.append(log)
+        # Reset offset if requested OR path changed
+        if reset_offset or path_changed:
+            source.last_read_offset = 0
 
-                # 🚨 Trigger alert evaluation
-                analyze_log(log)
+        db.session.commit()
 
-    return render_template("upload_logs.html")
+        flash("Log source updated successfully", "success")
+        return redirect(url_for("logs.list_log_sources"))
+
+    return render_template("edit_log_source.html", source=source)
 
 
-# ✅ Admin + User
+# Admin + User
 @log_bp.route("/search", methods=["GET", "POST"])
 @login_required
 def search_logs():
     results = []
+
     if request.method == "POST":
-        keyword = request.form.get("keyword", "").lower()
-        results = [
-            log for log in LOG_STORAGE
-            if keyword in (log["message"] or "").lower()
-        ]
+        keyword = request.form.get("keyword", "").strip()
+
+        if keyword:
+            results = LogEntry.query.filter(
+                LogEntry.message.ilike(f"%{keyword}%")
+            ).order_by(LogEntry.created_at.desc()).all()
+
     return render_template("search_logs.html", results=results)

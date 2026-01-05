@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Alerts{% endblock %}
+
+{% block content %}
+
+<div class="row mb-3 align-items-center">
+    <div class="col">
+        <h3 class="fw-bold">Alerts</h3>
+        <p class="text-muted">Manage alert rules and schedules</p>
+    </div>
+    <div class="col text-end">
+        <a href="{{ url_for('alerts.create_alert') }}"
+           class="btn btn-primary">
+            + Create Alert
+        </a>
+        <a href="{{ url_for('history.alert_history') }}"
+           class="btn btn-outline-secondary">
+            Alert history
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Keyword</th>
+                <th>Interval</th>
+                <th>Status</th>
+                <th>Owner</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for alert in alerts %}
+            <tr>
+                <td class="fw-semibold">{{ alert.name }}</td>
+
+                <td>
+                    <span class="badge bg-secondary">
+                        {{ alert.keyword }}
+                    </span>
+                </td>
+
+                <td>{{ alert.interval_minutes }} min</td>
+
+                <td>
+                    <span class="badge
+                        {{ 'bg-success' if alert.enabled else 'bg-secondary' }}">
+                        {{ 'Enabled' if alert.enabled else 'Disabled' }}
+                    </span>
+                </td>
+
+                <td>
+                    {% if alert.user %}
+                        {{ alert.user.username }}
+                    {% else %}
+                        admin
+                    {% endif %}
+                </td>
+
+                <td>
+                    <a href="{{ url_for('alerts.toggle_alert', alert_id=alert.id) }}"
+                       class="btn btn-sm btn-outline-warning">
+                       {% if alert.enabled %}Disable{% else %}Enable{% endif %}
+                    </a>
+
+                    <a href="{{ url_for('alerts.edit_alert', alert_id=alert.id) }}"
+                       class="btn btn-sm btn-outline-primary ms-1">
+                       Edit
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+
+        {% if alerts|length == 0 %}
+        <div class="text-center text-muted py-4">
+            No alerts configured yet.
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

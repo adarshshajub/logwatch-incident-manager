@@ -15,7 +15,7 @@ def is_throttled(alert_id, action_type, throttle_minutes):
     if not record:
         return False
 
-    next_allowed_time = record.last_triggered_at + timedelta(minutes=throttle_minutes)
+    next_allowed_time = record.triggered_at + timedelta(minutes=throttle_minutes)
     return datetime.utcnow() < next_allowed_time
 
 
@@ -28,12 +28,13 @@ def record_execution(alert_id, action_type):
     ).first()
 
     if record:
-        record.last_triggered_at = now
+        record.triggered_at = now
     else:
         db.session.add(AlertExecution(
             alert_id=alert_id,
             action_type=action_type,
-            last_triggered_at=now
+            status="SUCCESS",
+            triggered_at=now
         ))
 
     db.session.commit()

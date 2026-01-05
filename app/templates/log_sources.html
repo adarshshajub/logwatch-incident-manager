@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Log Sources{% endblock %}
+
+{% block content %}
+
+<div class="row mb-3">
+    <div class="col">
+        <h3 class="fw-bold">Log Sources</h3>
+        <p class="text-muted">Manage monitored log file paths</p>
+    </div>
+    <div class="col text-end">
+        <a href="{{ url_for('logs.add_log_source') }}"
+           class="btn btn-primary">
+            + Add Log Source
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body table-responsive">
+
+        <table class="table align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>File Path</th>
+                    <th>Status</th>
+                    <th>Offset</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for s in sources %}
+                <tr>
+                    <td class="fw-semibold">{{ s.name }}</td>
+
+                    <td class="text-muted" style="max-width: 400px; word-break: break-all;">
+                        {{ s.file_path }}
+                    </td>
+
+                    <td>
+                        <span class="badge
+                          {{ 'bg-success' if s.enabled else 'bg-secondary' }}">
+                          {{ 'Enabled' if s.enabled else 'Disabled' }}
+                        </span>
+                    </td>
+
+                    <td>{{ s.last_read_offset }}</td>
+
+                    <td>
+                        <a href="{{ url_for('logs.edit_log_source', source_id=s.id) }}"
+                           class="btn btn-sm btn-outline-primary">
+                           Edit
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}
