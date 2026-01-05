@@ -18,7 +18,7 @@ def execute_servicenow_action(alert, action_config, log_data):
                 action_config["short_description"], context
             ),
             "description": render_template_string(
-                f"{action_config["description"]} {action_config["search_content"]}", context
+                f"{action_config["description"]}", context
             ),
             "priority": action_config.get("priority", "3"),
         }

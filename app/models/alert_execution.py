@@ -19,7 +19,8 @@ class AlertExecution(db.Model):
 
     triggered_at = db.Column(
         db.DateTime,
-        default=datetime.utcnow,   # ✅ default only
+        default=datetime.utcnow,   # default only
         nullable=False
     )
+
     

@@ -48,17 +48,68 @@ def edit_alert(alert_id):
     if current_user.role != "admin" and alert.user_id != current_user.id:
         return "Unauthorized", 403
 
+    email_action = AlertAction.query.filter_by(
+        alert_id=alert.id, action_type="email"
+    ).first()
+
+    sn_action = AlertAction.query.filter_by(
+        alert_id=alert.id, action_type="servicenow"
+    ).first()
+
     if request.method == "POST":
         alert.name = request.form["name"]
         alert.keyword = request.form["keyword"]
         alert.interval_minutes = int(request.form["interval_minutes"])
         alert.enabled = "enabled" in request.form
 
+        if "email_action" in request.form:
+            email_config = {
+                "to": request.form.get("email_to", "").split(","),
+                "subject": request.form.get("email_subject"),
+                "body": request.form.get("email_body"),
+                "importance": request.form.get("email_importance", "normal"),
+                "include_log": "email_include_log" in request.form,
+            }
+
+            if email_action:
+                email_action.config = email_config
+            else:
+                db.session.add(AlertAction(
+                    alert_id=alert.id,
+                    action_type="email",
+                    config=email_config
+                ))
+        else:
+            if email_action:
+                db.session.delete(email_action)
+
+        # ---- SERVICENOW ACTION ----
+        if "sn_action" in request.form:
+            sn_config = {
+                "priority": request.form.get("sn_priority"),
+                "short_description": request.form.get("sn_short_desc"),
+                "description": request.form.get("sn_description"),
+                "include_log": "sn_include_log" in request.form,
+            }
+
+            if sn_action:
+                sn_action.config = sn_config
+            else:
+                db.session.add(AlertAction(
+                    alert_id=alert.id,
+                    action_type="servicenow",
+                    config=sn_config
+                ))
+        else:
+            if sn_action:
+                db.session.delete(sn_action)
+
+
         db.session.commit()
         flash("Alert updated successfully", "success")
         return redirect(url_for("alerts.list_alerts"))
 
-    return render_template("edit_alert.html", alert=alert)
+    return render_template("edit_alert.html", alert=alert,email_action=email_action, sn_action=sn_action)
 
 @alert_bp.route("/create", methods=["GET", "POST"])
 @login_required
@@ -68,9 +119,7 @@ def create_alert():
 
         # Get multiple actions
         email_selected = "email_action" in request.form
-        email_log_include = "email_include_log" in request.form
         sn_selected = "sn_action" in request.form
-        sn_log_include = "sn_include_log" in request.form
 
         if not email_selected and not sn_selected:
             return "At least one action must be selected", 400
@@ -84,44 +133,6 @@ def create_alert():
         db.session.add(alert)
         db.session.flush()  # get alert.id
 
-        email_search_request = None
-        sn_search_request = "" 
-        if keyword:
-            results = LogEntry.query.filter(
-                LogEntry.message.ilike(f"%{keyword}%")
-            ).order_by(LogEntry.created_at.desc()).all()
-
-            email_search_request = f"""
-                    <table class="table table-striped">
-                        <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Message</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                    """
-            
-            for result in results:
-                email_search_request += f"""
-                        <tr>
-                            <td>{ result.timestamp }</td>
-                            <td>{ result.message }</td>
-                        </tr>
-                    """
-                
-                sn_search_request += f"""
-                        ------------------------------------------
-                        {result.timestamp}\n
-                        { result.message }\n
-                        ------------------------------------------\n
-                    """ 
-            
-            email_search_request += """ </tbody>
-                    </table>"""
-
-
-
         # Email action
         if "email_action" in request.form:
             email_config = {
@@ -129,11 +140,9 @@ def create_alert():
                 "subject": request.form["email_subject"],
                 "body": request.form["email_body"],
                 "importance": request.form["email_importance"],
-                "throttle_minutes": int(request.form.get("email_throttle") or 0)
+                "throttle_minutes": int(request.form["email_throttle"] or 0),
+                "include_log": "email_include_log" in request.form,
             }
-
-            if email_log_include:
-                email_config["search_content"] = email_search_request
 
             db.session.add(AlertAction(
                 alert_id=alert.id,
@@ -147,11 +156,9 @@ def create_alert():
                 "priority": request.form["sn_priority"],
                 "short_description": request.form["sn_short_desc"],
                 "description": request.form["sn_description"],
-                "throttle_minutes": int(request.form.get("sn_throttle") or 0)
+                "throttle_minutes": int(request.form["sn_throttle"] or 0),
+                "include_log": "email_include_log" in request.form,
             }
-
-            if sn_log_include:
-                sn_config["search_content"] = sn_search_request
 
             db.session.add(AlertAction(
                 alert_id=alert.id,

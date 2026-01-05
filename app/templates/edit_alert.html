@@ -2,15 +2,14 @@
 {% block title %}Edit Alert{% endblock %}
 
 {% block content %}
-
 <div class="row justify-content-center">
   <div class="col-lg-8">
 
     <h3 class="fw-bold mb-3">Edit Alert</h3>
-    <p class="text-muted mb-4">Update alert configuration</p>
 
     <form method="POST">
 
+      <!-- Alert Rule -->
       <div class="card shadow-sm mb-4">
         <div class="card-header fw-semibold">Alert Rule</div>
         <div class="card-body">
@@ -30,15 +29,15 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Search Interval (minutes)</label>
+            <label class="form-label">Interval (minutes)</label>
             <input type="number" name="interval_minutes"
                    class="form-control"
-                   value="{{ alert.interval_minutes }}" min="1">
+                   value="{{ alert.interval_minutes }}" required>
           </div>
 
           <div class="form-check">
-            <input class="form-check-input" type="checkbox"
-                   name="enabled"
+            <input class="form-check-input"
+                   type="checkbox" name="enabled"
                    {% if alert.enabled %}checked{% endif %}>
             <label class="form-check-label">Enabled</label>
           </div>
@@ -46,17 +45,89 @@
         </div>
       </div>
 
+      <!-- EMAIL ACTION -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">
+          <input class="form-check-input me-2"
+                 type="checkbox" name="email_action"
+                 {% if email_action %}checked{% endif %}>
+          Email Alert
+        </div>
+
+        <div class="card-body">
+
+          <input class="form-control mb-2"
+                 name="email_to"
+                 placeholder="Recipients"
+                 value="{{ email_action.config.to | join(',') if email_action }}">
+
+          <input class="form-control mb-2"
+                 name="email_subject"
+                 placeholder="Subject"
+                 value="{{ email_action.config.subject if email_action }}">
+
+          <textarea class="form-control mb-2"
+                    name="email_body"
+                    rows="3">{{ email_action.config.body if email_action }}</textarea>
+
+          <select name="email_importance" class="form-select">
+            <option value="normal"
+              {% if email_action and email_action.config.importance == "normal" %}selected{% endif %}>
+              Normal
+            </option>
+            <option value="high"
+              {% if email_action and email_action.config.importance == "high" %}selected{% endif %}>
+              High
+            </option>
+            <option value="low"
+              {% if email_action and email_action.config.importance == "low" %}selected{% endif %}>
+              Low
+            </option>
+          </select>
+
+        </div>
+      </div>
+
+      <!-- SERVICENOW ACTION -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header fw-semibold">
+          <input class="form-check-input me-2"
+                 type="checkbox" name="sn_action"
+                 {% if sn_action %}checked{% endif %}>
+          ServiceNow Incident
+        </div>
+
+        <div class="card-body">
+
+          <select name="sn_priority" class="form-select mb-2">
+            {% for p in ["1","2","3","4"] %}
+            <option value="{{p}}"
+              {% if sn_action and sn_action.config.priority == p %}selected{% endif %}>
+              P{{p}}
+            </option>
+            {% endfor %}
+          </select>
+
+          <input class="form-control mb-2"
+                 name="sn_short_desc"
+                 placeholder="Short description"
+                 value="{{ sn_action.config.short_description if sn_action }}">
+
+          <textarea class="form-control"
+                    name="sn_description"
+                    rows="3">{{ sn_action.config.description if sn_action }}</textarea>
+
+        </div>
+      </div>
+
       <div class="text-end">
         <button class="btn btn-primary">Save Changes</button>
-        <a href="{{ url_for('history.alert_history') }}"
-           class="btn btn-outline-secondary ms-2">
-           Cancel
-        </a>
+        <a href="{{ url_for('alerts.list_alerts') }}"
+           class="btn btn-outline-secondary ms-2">Cancel</a>
       </div>
 
     </form>
 
   </div>
 </div>
-
 {% endblock %}

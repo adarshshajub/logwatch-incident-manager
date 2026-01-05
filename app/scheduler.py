@@ -18,7 +18,7 @@ def run_scheduled_alerts():
     now = datetime.utcnow()
 
     # --------------------------------------------------
-    # 1️⃣ Ingest logs from all enabled sources
+    # Ingest logs from all enabled sources
     # --------------------------------------------------
     sources = LogSource.query.filter_by(enabled=True).all()
 
@@ -30,7 +30,7 @@ def run_scheduled_alerts():
             print(f"[Scheduler] Failed to ingest source {source.file_path}: {e}")
 
     # --------------------------------------------------
-    # 2️⃣ Execute alerts based on interval
+    # Execute alerts based on interval
     # --------------------------------------------------
     alerts = AlertConfig.query.filter_by(enabled=True).all()
 
@@ -39,7 +39,7 @@ def run_scheduled_alerts():
 
         # First-time execution
         if not run:
-            run = AlertRun(alert_id=alert.id)
+            run = AlertRun(alert_id=alert.id,last_run_at=now)
             should_run = True
         else:
             next_run_time = run.last_run_at + timedelta(

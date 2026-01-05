@@ -33,6 +33,7 @@ def record_execution(alert_id, action_type):
         db.session.add(AlertExecution(
             alert_id=alert_id,
             action_type=action_type,
+            status="SUCCESS",
             triggered_at=now
         ))
 
