@@ -1,47 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Search Logs{% endblock %}
-
 {% block content %}
-<h3 class="mb-4">Search Logs</h3>
-
-<form method="POST" class="row g-3 mb-4">
-    <div class="col-md-6">
-        <input type="text" name="keyword" class="form-control"
-               placeholder="Enter keyword (e.g. ERROR)" required>
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100">Search</button>
-    </div>
-</form>
-
-{% if results %}
-<div class="card">
-    <div class="card-header">
-        {{ results|length }} result(s) found
-    </div>
-    <div class="card-body table-responsive">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>Time</th>
-                <!-- <th>Level</th> -->
-                <th>Message</th>
-                <th>Source</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for log in results %}
-            <tr>
-                <td>{{ log.timestamp }}</td>
-                <td>{{ log.message }}</td>
-                <td>{{ log.source.file_path }}</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% elif request.method == "POST" %}
-<div class="alert alert-warning">No results found.</div>
-{% endif %}
+    <h3 class="mb-4">Search Logs</h3>
+    <form method="POST" class="row g-3 mb-4">
+        <div class="col-md-8">
+            <input type="text"
+                   name="keyword"
+                   class="form-control"
+                   placeholder="Enter keyword (e.g. ERROR)"
+                   required>
+        </div>
+        <div class="col">
+                <button class="btn btn-primary col-md-5">Search</button>
+            <a href="{{ url_for('alerts.create_alert') }}" class="btn btn-warning col-md-5">Save as Alert</a>
+        </div>
+    </form>
+    {% if results %}
+        <div class="card">
+            <div class="card-header">{{ results|length }} result(s) found</div>
+            <div class="card-body table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <!-- <th>Level</th> -->
+                            <th>Message</th>
+                            <th>Source</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in results %}
+                            <tr>
+                                <td>{{ log.timestamp }}</td>
+                                <td>{{ log.message }}</td>
+                                <td>{{ log.source.file_path }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% elif request.method == "POST" %}
+        <div class="alert alert-warning">No results found.</div>
+    {% endif %}
 {% endblock %}
