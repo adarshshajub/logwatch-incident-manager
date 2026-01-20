@@ -1,4 +1,4 @@
-<h1>📊 LogWatch Incident Manager</h1>
+<h1> LogWatch Incident Manager</h1>
 
 <p>
   <strong>LogWatch Incident Manager</strong> is a Flask-based log monitoring and alerting system
@@ -13,7 +13,7 @@
 
 <hr>
 
-<h2>🚀 Features</h2>
+<h2> Features</h2>
 
 <ul>
   <li>User authentication & role-based access (Admin / User)</li>
