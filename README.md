@@ -183,6 +183,7 @@ pip install -r requirements.txt
 flask --app run.py db init
 flask --app run.py db migrate -m "initial schema"
 flask --app run.py db upgrade
+
 python run.py
 </pre>
 
@@ -220,5 +221,4 @@ python run.py
   <li>Dashboard analytics</li>
 </ul>
 
-<hr>
 
